@@ -11,5 +11,5 @@ urlpatterns = patterns('',
     
     (r'^confirm_email/(\w+)/$', 'emailconfirmation.views.confirm_email'),
     
-    (r'^admin/(.*)', admin.site.root),
+    (r'^admin/', include(admin.site.urls))
 )

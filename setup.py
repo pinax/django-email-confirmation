@@ -12,7 +12,7 @@ setup(
     packages=find_packages(exclude=["devproject.devtest", "devproject"]),
     package_data = {
         "emailconfirmation": [
-            "templates/emailconfirmation/*.txt"
+            "templates/emailconfirmation/*"
         ],
     },
     zip_safe=False,
