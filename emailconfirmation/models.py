@@ -14,6 +14,18 @@ from django.contrib.auth.models import User
 
 from emailconfirmation.signals import email_confirmed, email_confirmation_sent
 
+# django 1.4 compatibility
+try:
+    from django.utils.timezone import now
+except ImportError:
+    now = datetime.datetime.now
+
+# For those who want the emails in the database to be unique they can specify EMAIL_UNIQUE = True in their settings.py
+try:
+    UNIQUE_EMAIL = settings.EMAIL_UNIQUE
+except:
+    UNIQUE_EMAIL = False
+
 # this code based in-part on django-registration
 
 class EmailAddressManager(models.Manager):
@@ -45,7 +57,7 @@ class EmailAddressManager(models.Manager):
 class EmailAddress(models.Model):
     
     user = models.ForeignKey(User)
-    email = models.EmailField()
+    email = models.EmailField(unique=UNIQUE_EMAIL)
     verified = models.BooleanField(default=False)
     primary = models.BooleanField(default=False)
     
@@ -70,10 +82,10 @@ class EmailAddress(models.Model):
     class Meta:
         verbose_name = _("email address")
         verbose_name_plural = _("email addresses")
-        unique_together = (
-            ("user", "email"),
-        )
-
+        if not UNIQUE_EMAIL:
+            unique_together = (
+                ("user", "email"),
+            )
 
 class EmailConfirmationManager(models.Manager):
     
@@ -123,7 +135,7 @@ class EmailConfirmationManager(models.Manager):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email_address.email])
         confirmation = self.create(
             email_address=email_address,
-            sent=datetime.datetime.now(),
+            sent=now(),
             confirmation_key=confirmation_key
         )
         email_confirmation_sent.send(
@@ -149,7 +161,7 @@ class EmailConfirmation(models.Model):
     def key_expired(self):
         expiration_date = self.sent + datetime.timedelta(
             days=settings.EMAIL_CONFIRMATION_DAYS)
-        return expiration_date <= datetime.datetime.now()
+        return expiration_date <= now()
     key_expired.boolean = True
     
     def __unicode__(self):
