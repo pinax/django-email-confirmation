@@ -14,10 +14,17 @@ from django.contrib.auth.models import User
 
 from emailconfirmation.signals import email_confirmed, email_confirmation_sent
 
+# django 1.4 compatibility
 try:
     from django.utils.timezone import now
 except ImportError:
     now = datetime.datetime.now
+
+# For those who want the emails in the database to be unique they can specify EMAIL_UNIQUE = True in their settings.py
+try:
+    UNIQUE_EMAIL = settings.EMAIL_UNIQUE
+except:
+    UNIQUE_EMAIL = False
 
 # this code based in-part on django-registration
 
@@ -50,7 +57,7 @@ class EmailAddressManager(models.Manager):
 class EmailAddress(models.Model):
     
     user = models.ForeignKey(User)
-    email = models.EmailField()
+    email = models.EmailField(unique=UNIQUE_EMAIL)
     verified = models.BooleanField(default=False)
     primary = models.BooleanField(default=False)
     
@@ -75,10 +82,10 @@ class EmailAddress(models.Model):
     class Meta:
         verbose_name = _("email address")
         verbose_name_plural = _("email addresses")
-        unique_together = (
-            ("user", "email"),
-        )
-
+        if not UNIQUE_EMAIL:
+            unique_together = (
+                ("user", "email"),
+            )
 
 class EmailConfirmationManager(models.Manager):
     
