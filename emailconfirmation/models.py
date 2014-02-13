@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import render_to_string
 from django.utils.hashcompat import sha_constructor
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from django.contrib.sites.models import Site
 
@@ -154,7 +155,7 @@ class EmailConfirmation(models.Model):
     def key_expired(self):
         expiration_date = self.sent + datetime.timedelta(
             days=settings.EMAIL_CONFIRMATION_DAYS)
-        return expiration_date <= datetime.datetime.now()
+        return expiration_date <= timezone.make_aware(datetime.datetime.now(), timezone.get_default_timezone())
     key_expired.boolean = True
     
     def __unicode__(self):
