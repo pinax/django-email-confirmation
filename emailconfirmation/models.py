@@ -10,7 +10,12 @@ from django.utils.hashcompat import sha_constructor
 from django.utils.translation import gettext_lazy as _
 
 from django.contrib.sites.models import Site
-from django.contrib.auth.models import User
+
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 
 from emailconfirmation.signals import email_confirmed, email_confirmation_sent
 
