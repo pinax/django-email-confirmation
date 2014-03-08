@@ -1,12 +1,12 @@
 import datetime
 from random import random
+from hashlib import sha1
 
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import render_to_string
-from django.utils.hashcompat import sha_constructor
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
@@ -97,8 +97,8 @@ class EmailConfirmationManager(models.Manager):
             return email_address
     
     def send_confirmation(self, email_address):
-        salt = sha_constructor(str(random())).hexdigest()[:5]
-        confirmation_key = sha_constructor(salt + email_address.email).hexdigest()
+        salt = sha1(str(random())).hexdigest()[:5]
+        confirmation_key = sha1(salt + email_address.email).hexdigest()
         current_site = Site.objects.get_current()
         # check for the url with the dotted view path
         try:
